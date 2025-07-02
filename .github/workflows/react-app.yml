@@ -1,4 +1,4 @@
-name: Deploy React App to S3 and CloudFront
+name: Build and Deploy React App to S3 and CloudFront
 
 on:
   push:
@@ -6,11 +6,11 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -21,15 +21,15 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build React app
+      - name: Build the React app
         run: npm run build
 
-      - name: Sync build folder to S3
+      - name: Upload to S3
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:
           args: --acl public-read --delete
         env:
-          AWS_S3_BUCKET: ${{ secrets.S3_BUCKET_NAME }}
+          AWS_S3_BUCKET: marck-react-build
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
@@ -38,7 +38,7 @@ jobs:
       - name: Invalidate CloudFront cache
         uses: aws-actions/aws-cloudfront-invalidate-cache@v1
         with:
-          distribution-id: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+          distribution-id: E3QMKFXHU3LZI9
           paths: '/*'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
